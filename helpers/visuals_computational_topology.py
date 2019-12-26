@@ -6,12 +6,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-
-
 def plot_a_bar(p, q, c='b', linestyle='-'):
     plt.plot([p[0], q[0]], [p[1], q[1]], c=c, linestyle=linestyle, linewidth=1)
 
-def plot_barcode(diagrams, dimensions=all):
+def plot_barcode(diagrams, dimensions=all, show=True, thresh=1E9):
     """
     # An example usage:
     from ripser import ripser
@@ -29,7 +27,7 @@ def plot_barcode(diagrams, dimensions=all):
         dimensions = dimensions+1
     else: 
         dimensions = len(diagrams)
-        
+    bar_colors = ['b','r','g']    
     for dim in range(dimensions):
         number_of_bars = len(diagrams[dim])
         
@@ -41,22 +39,18 @@ def plot_barcode(diagrams, dimensions=all):
             for i in range(number_of_bars):
                 birth = [diagrams[dim][i, 0], i]
                 death = [diagrams[dim][i, 1], i]
+                
                 maximum_death = np.nanmax(diagrams[dim][diagrams[dim] < 1E308].flatten())
-                if np.isinf(death[0]):
-                    number_of_bars_inf += 1
-                    plot_a_bar(birth, [1.05 * maximum_death, i])
-                    plt.scatter([1.05 * maximum_death], [i], c='b', s=10, marker='>')
-                else:
-                    number_of_bars_fin += 1
-                    plot_a_bar(birth, death)
+                if death[0]>=thresh:
+                    if np.isinf(death[0]):
+                        number_of_bars_inf += 1
+                        plot_a_bar(birth, [1.05 * maximum_death, i], c = bar_colors[dim])
+                        plt.scatter([1.05 * maximum_death], [i], c='b', s=10, marker='>')
+                    else:
+                        number_of_bars_fin += 1
+                        plot_a_bar(birth, death)
             title = "%d-dimensional bars: %d finite, %d infinite" % (dim, number_of_bars_fin, number_of_bars_inf)
             ax.set_title(title, fontsize=10)
             plt.yticks([])
-            plt.show()
-    
-    
-    
-    
-    
-    
-    
+            if show:
+                plt.show()
